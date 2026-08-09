@@ -27,6 +27,11 @@ export interface StenographerSettings {
     includeSpeakers: boolean;
 
     // --- Frontmatter field names ---
+    /**
+     * Write the source URL under a platform-specific key (`youtube_url`,
+     * `apple_podcasts_url`, …) instead of the generic source field.
+     */
+    platformSpecificUrlField: boolean;
     titleFieldName: string;
     sourceFieldName: string;
     channelFieldName: string;
@@ -55,6 +60,7 @@ export const DEFAULT_SETTINGS: StenographerSettings = {
     lineTargetChars: 220,
     includeSpeakers: true,
 
+    platformSpecificUrlField: true,
     titleFieldName: 'title',
     sourceFieldName: 'source',
     channelFieldName: 'channel',

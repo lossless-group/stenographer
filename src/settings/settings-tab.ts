@@ -247,9 +247,23 @@ export class StenographerSettingTab extends PluginSettingTab {
         const fields = this.createSection('Frontmatter field names', { open: false });
         this.note(fields, 'Keys written into the created note. Defaults follow the spec schema.');
 
+        new Setting(fields)
+            .setName('Platform-specific URL field')
+            .setDesc(
+                'Write the source URL as youtube_url, apple_podcasts_url, soundcloud_url, and so ' +
+                'on, based on the link. Unrecognized hosts fall back to the generic Source field ' +
+                'below. Turn this off to always use the generic field.',
+            )
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.platformSpecificUrlField)
+                .onChange(async (value) => {
+                    this.plugin.settings.platformSpecificUrlField = value;
+                    await this.plugin.saveSettings();
+                }));
+
         const rows: Array<[label: string, desc: string, key: keyof StenographerSettings, placeholder: string]> = [
             ['Title', 'Video or episode title', 'titleFieldName', 'title'],
-            ['Source', 'Canonical URL of the original media', 'sourceFieldName', 'source'],
+            ['Source', 'Fallback URL key, used when the host is unrecognized or the toggle above is off', 'sourceFieldName', 'source'],
             ['Channel', 'Channel, host, or uploader', 'channelFieldName', 'channel'],
             ['Published', 'Original publication date', 'publishedFieldName', 'date_published'],
             ['Duration', 'Runtime in seconds', 'durationFieldName', 'duration_seconds'],

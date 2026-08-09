@@ -14,6 +14,34 @@ const PLATFORM_HOSTS: ReadonlyArray<readonly [platform: string, patterns: readon
     ['facebook', ['facebook.com', 'fb.watch']],
 ];
 
+/**
+ * Slugs used to name the platform-specific frontmatter URL field
+ * (`youtube_url`, `apple_podcasts_url`, …).
+ *
+ * Deliberately SEPARATE from PLATFORM_HOSTS above. That list drives engine
+ * routing and must contain only what Supadata can actually ingest; this list
+ * is about naming a field and can safely recognize hosts we cannot transcribe
+ * directly (Apple Podcasts, Spotify) so the note still records where the
+ * episode came from. Conflating the two would route an Apple Podcasts link to
+ * an engine that will reject it.
+ */
+const SOURCE_LABELS: ReadonlyArray<readonly [slug: string, patterns: readonly string[]]> = [
+    ['youtube', ['youtube.com', 'youtu.be', 'youtube-nocookie.com']],
+    ['apple_podcasts', ['podcasts.apple.com', 'itunes.apple.com']],
+    ['spotify', ['spotify.com']],
+    ['soundcloud', ['soundcloud.com']],
+    ['vimeo', ['vimeo.com']],
+    ['tiktok', ['tiktok.com']],
+    ['instagram', ['instagram.com']],
+    ['twitter', ['twitter.com', 'x.com']],
+    ['facebook', ['facebook.com', 'fb.watch']],
+    ['overcast', ['overcast.fm']],
+    ['pocket_casts', ['pca.st', 'pocketcasts.com']],
+    ['substack', ['substack.com']],
+    ['descript', ['share.descript.com', 'descript.com']],
+    ['zoom', ['zoom.us']],
+];
+
 /** Extensions that indicate a URL points straight at a media file. */
 const MEDIA_EXTENSIONS = [
     '.mp3', '.m4a', '.mp4', '.wav', '.flac', '.ogg', '.opus',
@@ -50,6 +78,22 @@ export function detectPlatform(raw: string): string | null {
     const host = url.hostname.toLowerCase().replace(/^www\./, '');
     for (const [platform, patterns] of PLATFORM_HOSTS) {
         if (patterns.some(p => host === p || host.endsWith(`.${p}`))) return platform;
+    }
+    return null;
+}
+
+/**
+ * The frontmatter key this URL should be written under — `youtube_url`,
+ * `apple_podcasts_url`, and so on. Returns null for hosts we don't recognize,
+ * so the caller can fall back to the configurable generic field rather than
+ * inventing a key out of some CDN's hostname.
+ */
+export function sourceUrlFieldName(raw: string): string | null {
+    const url = parse(raw);
+    if (!url) return null;
+    const host = url.hostname.toLowerCase().replace(/^www\./, '');
+    for (const [slug, patterns] of SOURCE_LABELS) {
+        if (patterns.some(p => host === p || host.endsWith(`.${p}`))) return `${slug}_url`;
     }
     return null;
 }

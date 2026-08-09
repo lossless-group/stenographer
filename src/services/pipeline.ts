@@ -16,7 +16,7 @@ import {
 import type { StenographerSettings } from '../settings/settings';
 import { formatFrontmatter } from '../utils/yamlFrontmatter';
 import { slugifyTitle, todayPrefix, uniquePath } from '../utils/filename';
-import { chooseEngine, detectPlatform, normalizeUrl } from '../utils/urls';
+import { chooseEngine, detectPlatform, normalizeUrl, sourceUrlFieldName } from '../utils/urls';
 import { renderTranscriptBlock } from '../transcript/lfm';
 import * as supadata from './supadataService';
 import * as assemblyai from './assemblyAiService';
@@ -141,7 +141,12 @@ async function writeNote(
     const frontmatter: Record<string, unknown> = {};
 
     frontmatter[s.titleFieldName] = metadata?.title ?? 'Untitled transcript';
-    frontmatter[s.sourceFieldName] = url;
+
+    // `youtube_url` / `apple_podcasts_url` / … when the host is recognized and
+    // the setting is on; the configurable generic key otherwise. One key, not
+    // both — a note carrying the same URL twice invites them to drift apart.
+    const platformField = s.platformSpecificUrlField ? sourceUrlFieldName(url) : null;
+    frontmatter[platformField ?? s.sourceFieldName] = url;
     if (metadata?.authorName != null) frontmatter[s.channelFieldName] = metadata.authorName;
     if (metadata?.createdAt != null) frontmatter[s.publishedFieldName] = metadata.createdAt.slice(0, 10);
     if (metadata?.durationSeconds != null) frontmatter[s.durationFieldName] = Math.round(metadata.durationSeconds);

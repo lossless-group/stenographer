@@ -15,7 +15,7 @@ export default class StenographerPlugin extends Plugin {
 
         const ribbonIconEl = this.addRibbonIcon(
             'captions',
-            'Transcribe a link with Stenographer',
+            'Generate transcript from URL',
             () => { this.openModal(null); },
         );
         ribbonIconEl.addClass('stenographer-ribbon-icon');
@@ -36,7 +36,7 @@ export default class StenographerPlugin extends Plugin {
         // Open empty — the paste-a-link case.
         this.addCommand({
             id: 'transcribe-link',
-            name: 'Transcribe a link',
+            name: 'Generate transcript from URL',
             callback: () => { this.openModal(null); },
         });
 
@@ -45,7 +45,7 @@ export default class StenographerPlugin extends Plugin {
         // user having to select it precisely.
         this.addCommand({
             id: 'transcribe-link-in-note',
-            name: 'Transcribe the link under the cursor',
+            name: 'Generate transcript from the URL under the cursor',
             editorCallback: (editor: Editor) => {
                 const selection = editor.getSelection();
                 const haystack = selection !== '' ? selection : editor.getLine(editor.getCursor().line);
