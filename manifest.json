@@ -1,0 +1,11 @@
+{
+	"id": "stenographer",
+	"name": "Stenographer",
+	"version": "0.1.0",
+	"minAppVersion": "1.8.10",
+	"description": "Turn a YouTube, TikTok, or podcast link into a fully-frontmattered note with a timestamped transcript — without leaving your vault.",
+	"author": "The Lossless Group",
+	"authorUrl": "https://lossless.group",
+	"fundingUrl": "https://coff.ee/losslessgroup",
+	"isDesktopOnly": true
+}
