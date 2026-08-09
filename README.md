@@ -4,6 +4,8 @@
 
 Paste a link. Get a note. The video's title, channel, publish date, duration, and thumbnail land in YAML frontmatter; the words land in the body as a timestamped, speaker-aware transcript. Spoken content becomes searchable, linkable, quotable material in your vault instead of a URL you'll never open again.
 
+![Screenshot](https://ik.imagekit.io/xvpgfijuw/lossless-content-embeds/2026-08-08_Screenshot_Stenographer_9.05.49%E2%80%AFPM.png)
+
 - [Why care?](#why-care)
 - [What's new?](#whats-new)
 - [How it works](#how-it-works)
@@ -22,10 +24,11 @@ And because the transcript is written as a Lossless Flavored Markdown `:::transc
 
 This is **v0.1.0** — the first working cut.
 
-- **Two commands.** `Transcribe a link` opens an empty modal for a pasted URL. `Transcribe the link under the cursor` reads the link out of your selection, or just the line the cursor is on, and prefills it.
+- **Two commands.** `Generate transcript from URL` opens an empty modal for a pasted URL. `Generate transcript from the URL under the cursor` reads the link out of your selection, or just the line the cursor is on, and prefills it.
 - **Two engines, routed automatically.** Platform links go to Supadata; direct audio files go to AssemblyAI when a key is present, for speaker-by-speaker diarization.
 - **The modal tells you which engine will run** — and why — *before* you spend an API credit.
-- **Frontmatter that matches your vault.** Every field name is configurable; defaults follow the Stenographer spec schema.
+- **Frontmatter that matches your vault.** A YouTube link writes `youtube_url`, Apple Podcasts writes `apple_podcasts_url`, SoundCloud writes `soundcloud_url` — because that's how a vault refers to its sources. Every field name is configurable.
+- **Your tag namespace stays yours.** Provider tags are SEO keywords chosen by an uploader, so they're off by default. So is the description blockquote, which on YouTube is usually a wall of sponsor links.
 - **Backlinks that carry both halves.** Optionally writes a line into the note you triggered from holding the wikilink to the new transcript *and* the original source URL, so the provenance survives.
 - **Long recordings handled.** Videos over ~20 minutes come back as an async job; Stenographer polls it, reports elapsed time in the status notice, and gives up on a configurable timeout instead of hanging forever.
 
@@ -43,7 +46,7 @@ The result looks like this:
 ```markdown
 ---
 title: "How We Think About Distribution"
-source: "https://www.youtube.com/watch?v=…"
+youtube_url: "https://www.youtube.com/watch?v=…"
 channel: "Some Channel"
 date_published: "2026-04-02"
 duration_seconds: 3720
@@ -75,6 +78,8 @@ The routing rule lives in exactly one place (`src/utils/urls.ts::chooseEngine`) 
 **Failures are ranked by what you lose.** Metadata is fetched first because it names the file, but a metadata failure returns `null` and the run continues: losing a title is annoying, losing a transcript you already paid for is not acceptable. An empty transcript, by contrast, stops the run with an actionable message rather than creating a hollow note.
 
 **Requests go through Obsidian's `requestUrl`,** not browser `fetch` — a marketplace requirement, and it sidesteps CORS by threading through the Electron main process.
+
+**Symlinked folders work.** Obsidian's index doesn't reliably contain symlinked directories, and plenty of vaults alias folders in from a repo. The usual "index says missing, so create it" idiom would hit a real directory, throw, and lose your transcript *after* the paid API call — so existence is checked against the filesystem adapter too.
 
 ### Files
 
