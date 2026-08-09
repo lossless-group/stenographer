@@ -32,6 +32,14 @@ export interface StenographerSettings {
      * `apple_podcasts_url`, …) instead of the generic source field.
      */
     platformSpecificUrlField: boolean;
+    /**
+     * Write the provider's own tags into frontmatter. Off by default —
+     * provider tags are SEO keywords chosen by the uploader, not vocabulary
+     * from your vault, and they pollute a tag namespace you curate by hand.
+     */
+    includeProviderTags: boolean;
+    /** Write the provider's description as a blockquote under the title. */
+    includeDescription: boolean;
     titleFieldName: string;
     sourceFieldName: string;
     channelFieldName: string;
@@ -61,6 +69,8 @@ export const DEFAULT_SETTINGS: StenographerSettings = {
     includeSpeakers: true,
 
     platformSpecificUrlField: true,
+    includeProviderTags: false,
+    includeDescription: true,
     titleFieldName: 'title',
     sourceFieldName: 'source',
     channelFieldName: 'channel',

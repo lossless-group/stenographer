@@ -248,6 +248,33 @@ export class StenographerSettingTab extends PluginSettingTab {
         this.note(fields, 'Keys written into the created note. Defaults follow the spec schema.');
 
         new Setting(fields)
+            .setName('Write the provider\'s tags')
+            .setDesc(
+                'Off by default. Provider tags are SEO keywords chosen by the uploader, not ' +
+                'vocabulary from your vault — turning this on will mix them into a tag namespace ' +
+                'you curate by hand.',
+            )
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.includeProviderTags)
+                .onChange(async (value) => {
+                    this.plugin.settings.includeProviderTags = value;
+                    await this.plugin.saveSettings();
+                }));
+
+        new Setting(fields)
+            .setName('Include the provider\'s description')
+            .setDesc(
+                'Adds the video or episode description as a blockquote under the title. ' +
+                'On YouTube this is often a wall of sponsor links and timestamps.',
+            )
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.includeDescription)
+                .onChange(async (value) => {
+                    this.plugin.settings.includeDescription = value;
+                    await this.plugin.saveSettings();
+                }));
+
+        new Setting(fields)
             .setName('Platform-specific URL field')
             .setDesc(
                 'Write the source URL as youtube_url, apple_podcasts_url, soundcloud_url, and so ' +

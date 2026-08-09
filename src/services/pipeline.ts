@@ -152,7 +152,7 @@ async function writeNote(
     if (metadata?.durationSeconds != null) frontmatter[s.durationFieldName] = Math.round(metadata.durationSeconds);
     if (metadata?.thumbnailUrl != null) frontmatter[s.thumbnailFieldName] = metadata.thumbnailUrl;
     if (metadata?.platform != null) frontmatter.platform = metadata.platform;
-    if (metadata?.tags.length) frontmatter.tags = metadata.tags;
+    if (s.includeProviderTags && metadata?.tags.length) frontmatter.tags = metadata.tags;
     if (transcript.lang != null) frontmatter.language = transcript.lang;
     frontmatter[s.engineFieldName] = transcript.engine;
     frontmatter[s.transcribedDateFieldName] = new Date().toISOString();
@@ -162,7 +162,7 @@ async function writeNote(
         includeSpeakers: s.includeSpeakers,
     });
 
-    const description = metadata?.description ?? null;
+    const description = s.includeDescription ? (metadata?.description ?? null) : null;
     const sections = [
         `---\n${formatFrontmatter(frontmatter)}\n---`,
         `# ${metadata?.title ?? 'Untitled transcript'}`,
@@ -180,7 +180,18 @@ async function writeNote(
     return app.vault.create(path, `${sections.join('\n\n')}\n`);
 }
 
-/** Create the target folder, and any missing parents, if they do not exist. */
+/**
+ * Create the target folder, and any missing parents, if they do not exist.
+ *
+ * Existence is checked twice, deliberately. `getAbstractFileByPath` consults
+ * Obsidian's index, which does NOT reliably include symlinked directories —
+ * and symlinked folders are common in vaults that alias content from a repo.
+ * For those, the index says "missing", `createFolder` then hits a directory
+ * that really is on disk, and the whole run dies on an EEXIST for a folder the
+ * user can plainly see. `adapter.exists` asks the filesystem instead. The
+ * catch is the third belt: a race or an unindexed case still shouldn't lose a
+ * transcript that has already been paid for.
+ */
 async function ensureFolder(app: App, folder: string): Promise<void> {
     const normalized = normalizePath(folder).replace(/^\/+|\/+$/g, '');
     if (normalized === '' || normalized === '.') return;
@@ -189,8 +200,15 @@ async function ensureFolder(app: App, folder: string): Promise<void> {
     let current = '';
     for (const segment of segments) {
         current = current === '' ? segment : `${current}/${segment}`;
-        if (app.vault.getAbstractFileByPath(current) === null) {
+
+        if (app.vault.getAbstractFileByPath(current) !== null) continue;
+        if (await app.vault.adapter.exists(current)) continue;
+
+        try {
             await app.vault.createFolder(current);
+        } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            if (!/already exists/i.test(message)) throw error;
         }
     }
 }
