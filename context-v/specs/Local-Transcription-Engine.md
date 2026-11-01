@@ -11,7 +11,6 @@ semantic_version: 0.0.0.1
 status: Draft
 tags:
   - Specification
-  - Stenographer
   - Transcription
   - Whisper
   - Self-Hosting
@@ -19,6 +18,7 @@ tags:
 site_uuid: ed094ea9-dd06-4a9f-a327-53ab19c70ce1
 hex_code: uw0hs6
 publish: true
+type: Specs
 ---
 
 # A local transcription engine for Stenographer
